@@ -3,7 +3,7 @@ CHECKPOINT_PATH = "v2-1_768-ema-pruned.ckpt"
 CONFIG = "configs/stable-diffusion/v2-inference-v.yaml"
 HEIGHT = 768
 WIDTH = 768
-PROMPT = "Watercolor painting of Cambodia"
+PROMPT = "A monkey in a desert"
 
 from scripts.txt2img import main, parse_args
 
@@ -16,7 +16,7 @@ arg_dict = {
     "seed": 42,
     "n_samples": 1,
     "n_iter": 1,
-    "steps": 20,
+    "steps": 30,
 }
 
 opt = parse_args()
