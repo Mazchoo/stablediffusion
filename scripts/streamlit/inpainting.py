@@ -31,7 +31,7 @@ def initialize_model(config, ckpt):
 
     model.load_state_dict(torch.load(ckpt)["state_dict"], strict=False)
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu") # torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
     sampler = DDIMSampler(model)
 
@@ -67,7 +67,7 @@ def make_batch_sd(
 
 
 def inpaint(sampler, image, mask, prompt, seed, scale, ddim_steps, num_samples=1, w=512, h=512, eta=1.):
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu") # torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = sampler.model
 
     print("Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)...")

@@ -40,7 +40,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    # model.cuda()
     model.eval()
     return model
 
@@ -189,7 +189,7 @@ def main(opt):
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu") # torch.device("cuda") if torch.cuda.is_available() else 
     model = model.to(device)
 
     if opt.plms:
@@ -201,11 +201,6 @@ def main(opt):
 
     os.makedirs(opt.outdir, exist_ok=True)
     outpath = opt.outdir
-
-    print("Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)...")
-    wm = "SDV2"
-    wm_encoder = WatermarkEncoder()
-    wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
 
     batch_size = opt.n_samples
     n_rows = opt.n_rows if opt.n_rows > 0 else batch_size
@@ -236,7 +231,7 @@ def main(opt):
         precision_scope("cuda"), \
         model.ema_scope():
             all_samples = list()
-            for n in trange(opt.n_iter, desc="Sampling"):
+            for _ in trange(opt.n_iter, desc="Sampling"):
                 for prompts in tqdm(data, desc="data"):
                     uc = None
                     if opt.scale != 1.0:
@@ -261,7 +256,6 @@ def main(opt):
                     for x_sample in x_samples:
                         x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
                         img = Image.fromarray(x_sample.astype(np.uint8))
-                        img = put_watermark(img, wm_encoder)
                         img.save(os.path.join(sample_path, f"{base_count:05}.png"))
                         base_count += 1
                         sample_count += 1
@@ -276,12 +270,8 @@ def main(opt):
             # to image
             grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
             grid = Image.fromarray(grid.astype(np.uint8))
-            grid = put_watermark(grid, wm_encoder)
             grid.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
             grid_count += 1
-
-    print(f"Your samples are ready and waiting for you here: \n{outpath} \n"
-          f" \nEnjoy.")
 
 
 if __name__ == "__main__":

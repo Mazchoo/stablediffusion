@@ -23,7 +23,7 @@ def initialize_model(config, ckpt):
     model = instantiate_from_config(config.model)
     model.load_state_dict(torch.load(ckpt)["state_dict"], strict=False)
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu") # torch.device("cuda") if torch.cuda.is_available() else 
     model = model.to(device)
     sampler = DDIMSampler(model)
     return sampler
@@ -53,7 +53,7 @@ def make_noise_augmentation(model, batch, noise_level=None):
 
 
 def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callback=None, eta=0., noise_level=None):
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu") # torch.device("cuda") if torch.cuda.is_available() else 
     model = sampler.model
     seed_everything(seed)
     prng = np.random.RandomState(seed)
