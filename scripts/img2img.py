@@ -41,7 +41,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    # model.cuda()
     model.eval()
     return model
 
@@ -58,7 +58,7 @@ def load_img(path):
     return 2. * image - 1.
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -182,6 +182,10 @@ def main():
     )
 
     opt = parser.parse_args()
+    return opt
+
+
+def main(opt):
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")
@@ -194,11 +198,6 @@ def main():
 
     os.makedirs(opt.outdir, exist_ok=True)
     outpath = opt.outdir
-
-    print("Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)...")
-    wm = "SDV2"
-    wm_encoder = WatermarkEncoder()
-    wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
 
     batch_size = opt.n_samples
     n_rows = opt.n_rows if opt.n_rows > 0 else batch_size
@@ -255,7 +254,6 @@ def main():
                         for x_sample in x_samples:
                             x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
                             img = Image.fromarray(x_sample.astype(np.uint8))
-                            img = put_watermark(img, wm_encoder)
                             img.save(os.path.join(sample_path, f"{base_count:05}.png"))
                             base_count += 1
                         all_samples.append(x_samples)
@@ -268,7 +266,6 @@ def main():
                 # to image
                 grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
                 grid = Image.fromarray(grid.astype(np.uint8))
-                grid = put_watermark(grid, wm_encoder)
                 grid.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
                 grid_count += 1
 
@@ -276,4 +273,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    opt = parse_args()
+    main(opt)
